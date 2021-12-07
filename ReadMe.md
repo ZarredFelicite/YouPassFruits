@@ -14,6 +14,9 @@ Group project for ECE4078-Intelligent Robotics, using the [PenguinPi robot](http
 - Use SLAM and EKF to continuously update the map and localisation of the robot within it.
 - Use path planning algorithms (RRT) and proportional control to navigate the robot in the world.
 
+**Initial mapping of the environment:**
 ![gif](github/robot_operation.gif)
+**Aerial view of the gazebo simulator world:**
 ![map](github/map_aerial.png)
+
 Click [here](https://github.com/tianleimin/ECE4078_Lab_2021/blob/main/Week01-02/InstallationGuide.md) for VM and simulator environment installation instructions and [here](https://github.com/tianleimin/ECE4078_Lab_2021/) for more details on the project guidelines.
