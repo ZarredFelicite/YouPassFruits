@@ -1,0 +1,16 @@
+Loading gazebo world:
+source ~/catkin_ws/devel/setup.bash
+roslaunch penguinpi_gazebo ECE4078_final.launch
+
+Spawning map objects:
+source ~/catkin_ws/devel/setup.bash
+rosrun penguinpi_gazebo scene_manager.py -l map1.txt
+
+Evaluating SLAM and Object detection mapping performance:
+python3 SLAM_eval.py map1.txt lab_output/slam.txt
+python3 CV_eval.py --est lab_output/targets.txt --truth map1.txt
+
+cd ~/catkin_ws/src/penguinpi_gazebo
+source ~/catkin_ws/devel/setup.bash
+rosrun penguinpi_gazebo RetrievePose.py
+python3 delivery_eval.py --original map5.txt --current layout_after_delivery.txt

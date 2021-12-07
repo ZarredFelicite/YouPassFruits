@@ -782,10 +782,10 @@ if __name__ == "__main__":
         [sg.Text("Robot View")],
         [sg.Image(filename="", key="-IMAGE-")],
         [sg.Button("Clear Waypoint")],
-        [sg.Button("Exit")],
         [sg.Button("Toggle Object Detection")],
-        [sg.Button("Fix Marker Covariance")],
-        [sg.Button("Speed Boost")]
+        #[sg.Button("Fix Marker Covariance")],
+        [sg.Button("Speed Boost")],
+        [sg.Button("Exit")]
     ]
     middle_col = [
         [sg.Text("Map")],
@@ -796,17 +796,17 @@ if __name__ == "__main__":
                   drag_submits=False,
                   enable_events=True)]
     ]
-    right_col = [
-        [sg.Text("EKF View")],
-        [sg.Image(filename="", key="-IMAGE_EKF-")],
-    ]
+    # right_col = [
+    #     [sg.Text("SLAM Map View")],
+    #     [sg.Image(filename="", key="-IMAGE_EKF-")],
+    # ]
     layout = [
         [
             sg.Column(left_col),
             sg.VSeperator(),
             sg.Column(middle_col),
-            sg.VSeperator(),
-            sg.Column(right_col),
+            #sg.VSeperator(),
+            #sg.Column(right_col),
         ]
     ]
 
@@ -882,11 +882,11 @@ if __name__ == "__main__":
             operate.drive_flag = 1
             g.DeleteFigure(pointer)
             pointer = g.DrawPoint(mouse, icon_size, color='black')
-        if event in ('Fix Marker Covariance'):
-            for i in range(1,len(operate.ekf.P)-3):
-                operate.ekf.P[-i,:] = 1e-7
-                operate.ekf.P[:,-i] = 1e-7
-            print("settings covariance to 0 for markers")
+        # if event in ('Fix Marker Covariance'):
+        #     for i in range(1,len(operate.ekf.P)-3):
+        #         operate.ekf.P[-i,:] = 1e-7
+        #         operate.ekf.P[:,-i] = 1e-7
+        #     print("settings covariance to 0 for markers")
         if event in ('Speed Boost'):
             operate.command['ticks'] = [operate.command['ticks'][0] + 5, operate.command['ticks'][1] + 2]
             #operate.command['ticks'][0] = operate.command['ticks'][0] + 5
