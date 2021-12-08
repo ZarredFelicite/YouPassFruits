@@ -193,7 +193,7 @@ def planPath(next_object_to_move, robot_pose, mapname):
                    cur_len = len(new_path)
 
         count = count + 1
-        if count == 2:
+        if count == 5:
             print("Unable to find path, moving to next object")
 
             #return 0

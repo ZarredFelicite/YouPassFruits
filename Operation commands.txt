@@ -43,3 +43,5 @@ cd ~/catkin_ws/src/penguinpi_gazebo
 source ~/catkin_ws/devel/setup.bash
 rosrun penguinpi_gazebo RetrievePose.py
 python3 delivery_eval.py --original map5.txt --current layout_after_delivery.txt
+
+mv map1.txt ~/home/zarred/catkin_ws/src/penguinpi_gazebo/map.txt

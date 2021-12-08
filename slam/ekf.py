@@ -3,6 +3,26 @@ from mapping_utils import MappingUtils
 import cv2
 import math
 import pygame
+import ast
+
+def parse_map(fname: str) -> dict:
+    with open(fname,'r') as f:
+        gt_dict = ast.literal_eval(f.readline())        
+        apple_gt, lemon_gt, person_gt, aruco_gt, aruco_indx = [], [], [], [], []
+
+        # remove unique id of targets of the same type 
+        for key in gt_dict:
+            if key.startswith('apple'):
+                apple_gt.append((list(gt_dict[key].values())))
+            elif key.startswith('lemon'):
+                lemon_gt.append((list(gt_dict[key].values())))
+            elif key.startswith('person'):
+                person_gt.append((list(gt_dict[key].values())))
+            elif key.startswith('aruco'):
+                aruco_gt.append((list(gt_dict[key].values())))
+                aruco_indx.append(int(key[-3]))
+
+    return apple_gt, lemon_gt, person_gt, aruco_gt, aruco_indx
 
 class EKF:
     # Implementation of an EKF for SLAM
@@ -13,7 +33,7 @@ class EKF:
     # Add outlier rejection here
     ##########################################
 
-    def __init__(self, robot):
+    def __init__(self, robot, pull_map):
         # State components
         self.robot = robot
         self.markers = np.zeros((2,0))
@@ -22,6 +42,28 @@ class EKF:
         # Covariance matrix
         self.P = np.zeros((3,3))
         self.init_lm_cov = 1e1 #1e3
+        self.pull_map = pull_map
+        if self.pull_map:
+            apple_gt, lemon_gt, person_gt, aruco_gt, aruco_indx = parse_map('map1.txt')
+            for i in range(len(aruco_indx)):
+                if aruco_indx[i] == 0:
+                    aruco_indx[i] = 10
+            self.taglist = aruco_indx[::-1] + [11,12,13,14,15,16,17,18,19]
+            aruco = np.flip(np.array(aruco_gt).reshape((10,2)).T)
+            apple = np.flip(np.array(apple_gt).reshape((3,2)).T)
+            lemon = np.flip(np.array(lemon_gt).reshape((3,2)).T)
+            person = np.flip(np.array(person_gt).reshape((3,2)).T)
+            self.markers = np.concatenate((aruco,apple,lemon,person), axis=1)
+            print("Markers:")
+            print(self.markers.shape)
+            print(self.markers)
+            print("Tags:")
+            print(self.taglist)
+            for i in range(len(self.taglist)):
+                self.P = np.concatenate((self.P, np.zeros((2, self.P.shape[1]))), axis=0)
+                self.P = np.concatenate((self.P, np.zeros((self.P.shape[0], 2))), axis=1)
+                self.P[-2,-2] = 1e-10**2
+                self.P[-1,-1] = 1e-10**2
         self.robot_init_state = None
         self.lm_pics = []
         for i in range(1, 11):

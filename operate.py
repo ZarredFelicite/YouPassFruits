@@ -15,7 +15,6 @@ import io
 import matplotlib.pyplot as plt
 from torch import _euclidean_dist
 import re
-
 # import utility functions
 sys.path.insert(0, "{}/utility".format(os.getcwd()))
 from util.pibot import PenguinPi # access the robot
@@ -93,7 +92,7 @@ class Operate:
             self.pibot = PenguinPi(args.ip, args.port)
 
         # initialise SLAM parameters
-        self.ekf = self.init_ekf(args.calib_dir, args.ip)
+        self.ekf = self.init_ekf(args.calib_dir, args.ip, pull_map=False)
         self.aruco_det = aruco.aruco_detector(
             self.ekf.robot, marker_length = 0.07) # size of the ARUCO markers
 
@@ -151,6 +150,7 @@ class Operate:
         self.to_move = []
         self.waypoint = []
         self.reverse = 0
+        self.drawings = []
     def init_markers(self):
         apple_gt, lemon_gt, person_gt, aruco_gt, aruco_indx = parse_map('map1.txt')
         # self.ekf.taglist = aruco_indx
@@ -330,7 +330,7 @@ class Operate:
             self.notification = f'{f_} is saved'
 
     # wheel and camera calibration for SLAM
-    def init_ekf(self, datadir, ip):
+    def init_ekf(self, datadir, ip, pull_map):
         fileK = "{}intrinsic.txt".format(datadir)
         camera_matrix = np.loadtxt(fileK, delimiter=',')
         fileD = "{}distCoeffs.txt".format(datadir)
@@ -343,7 +343,7 @@ class Operate:
         baseline = np.loadtxt(fileB, delimiter=',')
         robot = Robot(baseline, scale, camera_matrix, dist_coeffs)
 
-        return EKF(robot)
+        return EKF(robot, pull_map)
 
     # save SLAM map
     def record_data(self):
@@ -489,7 +489,11 @@ class Operate:
         path = [[] for _ in range(len(current_path))]
         for i in range(len(current_path)):
             path[i] = [(x+1.5)*(500/3) for x in current_path[i]]
-            g.DrawCircle(path[i], 2, fill_color='black')
+            #g.DrawCircle(path[i], 2, fill_color='black')
+        for i in range(len(path)-1):
+            print("1: {} 2: {}".format(path[i],path[i+1]))
+            g.DrawLine(path[i],path[i+1])
+        print(path)
     def stopplanning(self, new_path):
         if self.command['stopplan'] == True:
             print("Stop planning")
@@ -717,6 +721,11 @@ class Operate:
 
     def showmap(self, window, g):
         if self.command['showmap'] == True:
+            if self.drawings:
+                for item in self.drawings:
+                    g.DeleteFigure(item)
+            else:
+                self.drawings = []
             print("showing map")
             apple_gt, lemon_gt, person_gt, aruco_gt, aruco_indx = parse_map("surveymap.txt")#surveymap.txt")
             apple = [list(x)[::-1] for x in apple_gt]
@@ -727,18 +736,23 @@ class Operate:
             radius = 83.5
             scale = g_size/3
             l_vel, r_vel = 0,0
-            for i in range(3):
+            for i in range(len(apple)):
                 apple[i] = [(x+1.5)*scale for x in apple[i]]
+            for i in range(len(lemon)):
                 lemon[i] = [(x+1.5)*scale for x in lemon[i]]
+            for i in range(len(person)):
                 person[i] = [(x+1.5)*scale for x in person[i]]
-                g.DrawCircle(person[i], radius, fill_color='grey')
-            for i in range(3):
-                g.DrawCircle(apple[i], icon_size, fill_color='red')
-                g.DrawCircle(lemon[i], icon_size, fill_color='yellow')
-                g.DrawCircle(person[i], icon_size, fill_color='blue')
-            for i in range(10):
+            for i in range(len(person)):
+                self.drawings.append(g.DrawCircle(person[i], radius, fill_color='grey'))
+            for i in range(len(apple)):
+                self.drawings.append(g.DrawCircle(apple[i], icon_size, fill_color='red'))
+            for i in range(len(lemon)):
+                self.drawings.append(g.DrawCircle(lemon[i], icon_size, fill_color='yellow'))
+            for i in range(len(person)):
+                self.drawings.append(g.DrawCircle(person[i], icon_size, fill_color='blue'))
+            for i in range(len(aruco)):
                 aruco[i] = [(x+1.5)*scale for x in aruco[i]]
-                g.DrawCircle(aruco[i], icon_size, fill_color='white')
+                self.drawings.append(g.DrawCircle(aruco[i], icon_size, fill_color='white'))
             self.command['showmap'] = False
         return
         

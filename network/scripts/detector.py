@@ -13,8 +13,8 @@ from matplotlib.ticker import NullLocator
 class Detector:
     def __init__(self, ckpt, use_gpu=False):
         #Load model and weights
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='network/scripts/best.pt').eval()
-        self.model.conf = 0.90 #0.93
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='network/scripts/best.pt')#.eval()
+        self.model.conf = 0.94 #0.93
         self.model.iou = 0.1
     def detect_single_image(self, np_img):
         detections = self.model(np_img)
@@ -25,7 +25,7 @@ class Detector:
             if pred[i] is not None:
                 if (pred[i,4] < 0.96)and(pred[i,5]==2):
                     deleting.append(i)
-                if (pred[i,0]<10)or(pred[i,2]>230):
+                if (pred[i,0]<20)or(pred[i,2]>220):
                     deleting.append(i)
         pred = np.delete(pred, deleting, axis=0)
         #print(pred)
