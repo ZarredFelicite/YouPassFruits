@@ -78,19 +78,7 @@ def im_convert(img):
 
 class Operate:
     def __init__(self, args):
-        self.folder = 'pibot_dataset/'
-        if not os.path.exists(self.folder):
-            os.makedirs(self.folder)
-        else:
-            shutil.rmtree(self.folder)
-            os.makedirs(self.folder)
-        
-        # initialise data parameters
-        if args.play_data:
-            self.pibot = dh.DatasetPlayer("record")
-        else:
-            self.pibot = PenguinPi(args.ip, args.port)
-
+        self.pibot = PenguinPi(args.ip, args.port)
         # initialise SLAM parameters
         self.ekf = self.init_ekf(args.calib_dir, args.ip, pull_map=False)
         self.aruco_det = aruco.aruco_detector(
